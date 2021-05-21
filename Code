@@ -1,0 +1,1396 @@
+
+#Set Working Directory
+getwd()
+setwd("/opt/shared/project/sdrn/data/sdrn_collab/SWILD_GROUP/Tomos/")
+
+#Install Packages
+install.packages("Hmisc")
+install.packages("dplyr")
+install.packages("survival")
+install.packages("ggplot2")
+install.packages("CBCgrps")
+
+install.packages("survminer")
+install.packages("tidyr")
+install.packages("tidyverse")
+
+#Load Libraries
+library(Hmisc)
+library(dplyr)
+library(survival)
+library(ggplot2)
+library(CBCgrps)
+
+library(survminer)
+library(tidyr)
+library(tidyverse)
+
+#Import Data Set
+Data_Original <- read.csv("03_cohort.csv", header = TRUE)
+head(Data_Original, 10)
+
+#Check structure type
+str(Data_Original)
+
+#New Data Intermediate
+Data <- Data_Original
+
+#ReCode Variables
+#Factors
+Data$gradetype <- as.factor(Data$gradetype)
+Data$oeststat <- as.factor(Data$oeststat)
+Data$herceptin.receptor.status <- as.factor(Data$herceptin.receptor.status)
+Data$progesterone.receptor.status <- as.factor(Data$progesterone.receptor.status)
+Data$gender <- as.factor(Data$gender)
+Data$dm.type <- as.factor(Data$dm.type)
+Data$simd.2016.decile <- as.factor(Data$simd.2016.decile)
+Data$death_cens <- as.factor(Data$death_cens)
+
+#Dates
+Data$doi <- as.Date(Data_Original$doi)
+Data$earliest.mention <- as.Date(Data$earliest.mention)
+Data$date.of.birth <- as.Date(Data$date.of.birth)
+Data$date.of.death <- as.Date(Data$date.of.death)
+Data$end_date <- as.Date(Data$end_date)
+
+#Dates Since 01-01-1970
+Data$mf_startdate <- as.Date(Data$mf_startdate, origin= "1970-01-01")
+Data$mf_enddate <- as.Date(Data$mf_enddate, origin= "1970-01-01")
+
+#New Variables
+#Cut Age at Diagnosis Into Quintiles
+Data$Age <- cut2(Data$age_at_diagbrca, g=5)
+
+#New MS Variable
+Data$MS <- Data$death_cens
+
+
+		
+#Diabetes Duration before Diagnosis #NEED TO RUN
+Data$Diabetes_to_BrCa <- difftime(Data$doi, Data$earliest.mention, units="days")
+head(Data$Diabetes_to_BrCa)
+Data$Diabetes_to_BrCa <- Data$Diabetes_to_BrCa /365.25
+
+#Metfromin Durations before Diagnosis 
+Data$Met_to_BrCa <- difftime(Data$doi, Data$mf_startdate, units ="days")
+head(Data$Met_to_BrCa)
+Data$Met_to_BrCa <- as.numeric(Data$Met_to_BrCa)
+str(cohort$DM_Cat)
+
+#Turn to years
+Data$Met_to_BrCa <- Data$Met_to_BrCa/365.25
+
+#New Factor variables
+Data$Met_Cat <- cut2(Data$Met_to_BrCa, c(1:4), na.rm = FALSE)
+summary(Data$Met_to_BrCa)
+Data$Met_Cat
+
+
+#exclude those who have taken metformin for less than 28 days
+one_month <- 30/365.25 
+sum(Data_3$Met_to_BrCa > one_month, na.rm = TRUE)
+
+#exlcue those for less than 90 days?
+three_month <- 90/365.25 
+sum(Data_3$Met_to_BrCa < three_month, na.rm = TRUE)
+
+#exlcue those for less than 90 days?
+six_month <- 180/365.25 
+sum(Data_3$Met_to_BrCa < six_month, na.rm = TRUE)
+
+#exlcue those for less than 365 days?
+one_year <- 360/365.25 
+sum(Data_3$Met_to_BrCa < one_year, na.rm = TRUE)
+
+#Variable Explorations
+sum(Data$Met_to_BrCa < 28, na.rm = TRUE)
+sum(Data$Met_to_BrCa < 90, na.rm = TRUE)
+mean(Data$Met_to_BrCa, na.rm = TRUE)
+median(Data$Met_to_BrCa, na.rm = TRUE)
+
+contents(cohorte)
+#Check Data Correct
+str(Data)
+
+##CHeck Date Variables
+head(Data_Original$mf_startdate, 10)
+head(Data$mf_startdate, 10)
+
+head(Data$date.of.death, 10)
+head(Data$doi, 10)
+
+#OK How Many individuals with BC before DM diagnosis
+count(Data)
+sum(Data$gender_cat == "Male") #54 Men
+
+head(Data, 1)
+
+#Who has missing data
+sum(is.na(Data))
+sum(is.na(Data$gradetype))
+#None Missing
+sum(is.na(Data$herceptin.receptor.status))
+#872 Missing
+sum(is.na(Data$oeststat))
+sum(Data$oeststat == 9)
+#None missing
+#184 No 9
+sum(is.na(Data$progesterone.receptor.status))
+sum(Data$progesterone.receptor.status = 9)
+#872 Missing
+sum(is.na(Data$gender))
+#None missing
+sum(is.na(Data$dm.type))
+#None missing
+sum(is.na(Data$simd.2016.decile))
+#136 Missing
+sum(is.na(Data$death_cens))
+#None Missing
+sum(is.na(Data$doi))
+#None missing
+sum(is.na(Data$earliest.mention))
+#None missing
+sum(is.na(Data$date.of.birth))
+#None missing
+sum(is.na(Data$date.of.death))
+#2252 Missing
+sum(is.na(Data$end_date))
+#None Missing
+sum(is.na(Data$age_at_diagbrca))
+#None Missing
+sum(is.na(Data$icd10site))
+#None Missing
+sum(is.na(Data$hba))
+head(Data$hba)
+#None
+sum(is.na(Data$ethnic))
+#None
+sum(is.na(Data$age_at_diagbrca))
+#None
+sum(is.na(Data$age_at_diagdm))
+#None
+sum(is.na(Data$gender_cat))
+#None
+sum(is.na(Data$simd.2016.quintile))
+#136
+sum(is.na(Data$death_primary_cause))
+#2512
+sum(is.na(Data$death_cvd))
+
+sum(is.na(Data$death_dm))
+
+sum(is.na(Data$death_anyca))
+
+sum(is.na(Data$death_brca))
+
+sum(is.na(Data$smoke_cat))
+#3
+sum(is.na(Data$bmi_diag))
+#1034
+sum(is.na(Data$hba1c_doi))
+#525
+sum(is.na(Data$metformin))
+
+sum(is.na(Data$mf_startdate))
+
+sum(is.na(Data$mf_enddate))
+
+sum(is.na(Data$su))
+
+sum(is.na(Data$oad))
+
+###OVERALL DATA IS TO A HIGH STANDARD
+
+#Lets find out who doesnt meet criteria
+#Remove Males - 54
+sum(Data$gender_cat == 'Male')
+Data_1 <- Data %>% filter(Data$gender_cat != "Male")
+
+#When is most recent death
+#This doesnt run - WHY
+sum(Data$date.of.death == "2020-07-27")
+
+# Remove those with BrCA < DM
+count(Data_1)
+Data_New <- Data_1%>% filter(doi>earliest.mention| is.na(doi)|is.na(earliest.mention))
+count(Data_New)
+#4521
+
+#Individuals with DM <18 - ##5
+sum(Data$age_at_diagdm < 18)
+Data_New <- Data_New %>% filter(age_at_diagdm > 18)
+#4516
+
+#Missing Smoking
+sum(is.na(Data_New$smoke_cat))
+Data_New <- Data_New %>% filter(!is.na(smoke_cat))
+#4513
+
+#Missing SIMD
+Data_New <- Data_New %>% filter(!is.na(simd.2016.quintile))
+#4378
+
+#Missing Ethnicity
+sum(is.na(Data$ethnic))
+#None 
+
+#Those who are underweight - Remove J Shape
+a <- table(Data$bmi_diag_cat)
+a
+sum(is.na(Data$bmi_diag_cat))
+
+
+#DIabetes afetr death? NOne
+sum(Data$earliest.mention <Data$date.of.death| is.na(Data$date.of.death)|is.na(Data$earliest.mention))
+
+
+#Exldue those taking met for less than 90 days 
+sum(Data_New$Met_to_BrCa < three_month, na.rm = TRUE)
+Data_4 <- Data_New %>% filter(Met_to_BrCa > three_month | is.na(Met_to_BrCa))
+str(Data_New$Met_to_BrCa)
+count(Data_4)
+sum(Data_4$Met_to_BrCa > three_month, na.rm = TRUE)
+
+#Exclude Insuline Users
+sum(Data_4$insulin == FALSE, na.rm = TRUE)
+Data_5 <- Data_4 %>% filter(insulin == FALSE)
+count(Data_5)
+
+#Metformin Only Variable
+Data_6 <- Data_5
+library(tidyverse)
+Data_6 <- transform(Data_6, group=factor(1+2+3*metformin+su+oad))
+Data_6 <- Data_6 %>% mutate(
+		group_new = case_when(metformin == TRUE & su == FALSE & oad == FALSE ~"1",
+				metformin == FALSE & su == TRUE & oad == FALSE ~"2",
+				metformin == FALSE & su == FALSE & oad == TRUE ~"3",
+				metformin == FALSE & su == FALSE & oad == FALSE ~ "4",
+				metformin == TRUE & su == TRUE & oad == FALSE ~"5",
+				metformin == TRUE & su == FALSE & oad == TRUE ~"6",
+				metformin == TRUE & su == TRUE & oad == TRUE ~"7",
+				TRUE~as.character(group)))
+
+count(Data_6)
+Data_6$group_new <- as.factor(Data_6$group_new)
+head(Data_6)
+
+#Summary of treatment groups 
+summary(Data_6$group_new)
+
+#No. Survivors by Tx. 
+#1 = Met only - 836
+#2 = SU only - 353
+#3 = OAD ony - 81
+#4 = None - 1780
+#5 = Met + Su - 428
+#6 = Met + oad - 163
+#7 = Met + Su + OAD - 129 
+
+#Single Medications Results
+sum(Data_6$group_new == "1" & Data_6$MS == "1") #366 Deaths - 43.8%
+sum(Data_6$group_new == "2" & Data_6$MS == "1") #251 - 71.1%
+sum(Data_6$group_new == "3" & Data_6$MS == "1") #37 - 45.7%
+sum(Data_6$group_new == "4" & Data_6$MS == "1") #915 - 51.4%
+
+
+sum(Data_6$group_new == "1" & Data_6$MS == "0") #470 Survivors
+sum(Data_6$group_new == "2" & Data_6$MS == "0") #102
+sum(Data_6$group_new == "3" & Data_6$MS == "0") #44
+sum(Data_6$group_new == "4" & Data_6$MS == "0") #865
+
+## Secondary part- Double and double and triple medications use
+sum(Data_6$group_new == "5" & Data_6$MS == "1") #216 Deaths - 50.5%
+sum(Data_6$group_new == "6" & Data_6$MS == "1") #48  - 31.4%
+sum(Data_6$group_new == "7" & Data_6$MS == "1") #45 - 34.9%
+
+sum(Data_6$group_new == "5" & Data_6$MS == "0") #212 Deaths 
+sum(Data_6$group_new == "6" & Data_6$MS == "0") #105 - 
+sum(Data_6$group_new == "7" & Data_6$MS == "0") #84 
+
+#No. Overall Survivors
+sum(Data_8$MS == 1) #1888 Dead
+sum(Data_8$MS == 0) #1882 Alive
+
+#Breakdown of deaths
+Data_7 <- Data_6
+Data_7$ms <- as.factor(Data_7$ms)
+Data_7$death_cvd <- as.factor(Data_7$death_cvd)
+Data_7$death_anyca <- as.factor(Data_7$death_anyca)
+Data_7$death_brca <- as.factor(Data_7$death_brca)
+
+
+#Need Remove individuals who MF end date < doic
+sum(Data_7$mf_enddate < ((Data_7$doi)- 180), na.rm = TRUE)
+head(Data_7, 1)
+
+#seemingly Nonone who stopped taking met 
+#When command above is reversed n = 1454
+str(Data_7$mf_enddate)
+Data_7$mf_period <- difftime(Data_7$mf_enddate, Data_7$doi, units="days")
+
+#Took Met for less than 30 Days
+sum(Data_7$mf_period < 30, na.rm = TRUE) #65
+
+#Took Met for less than 90 Days
+sum(Data_7$mf_period < 90, na.rm = TRUE) #214
+
+#Took Met for less than 180 Days
+sum(Data_7$mf_period < 180, na.rm = TRUE) #342
+
+#MAYBE remove people for less than 90 DAYS
+#Depending on the size of effect
+#COunt Before 3770
+count(Data_7)
+#COunt After 3554
+Data_8 <- Data_7 %>% filter(mf_period > 90 | is.na(mf_period))
+count(Data_8)
+
+#Summary of treatment groups 
+summary(Data_8$group_new)
+
+sum(Data_7$death_cens == "1")
+
+#Death Any Cause
+sum(Data_8$group_new == "1" & Data_8$death_cens == "1") #295
+sum(Data_8$group_new == "4" & Data_8$death_cens == "1") #915
+
+#Death DM
+sum(Data_8$group_new == "1" & Data_8$death_dm == TRUE) #10 
+sum(Data_7$group_new == "4" & Data_7$death_dm == TRUE) #23
+
+#Death CVD
+sum(Data_8$group_new == "1" & Data_8$death_cvd == TRUE) #39 
+sum(Data_7$group_new == "4" & Data_7$death_cvd == TRUE) #103
+
+#Death AnyCA
+sum(Data_8$group_new == "1" & Data_8$death_anyca == TRUE) #125 
+sum(Data_7$group_new == "4" & Data_7$death_anyca == TRUE) #440
+
+#Death BRCA
+sum(Data_8$group_new == "1" & Data_8$death_brca == TRUE) #99 
+sum(Data_7$group_new == "4" & Data_7$death_brca == TRUE) #354
+
+#Death Other #OLLDDD!!!!!!1
+# Met only 
+death_other = 366 -12 - 46 - 158 
+print(death_other) #150
+#No Met Death Other
+death_other_2 = 915 - 23- 103 - 440 
+print(death_other_2) #349
+
+#################
+#Summary of treatment groups 
+summary(Data_8$group_new)
+
+#No. Survivors by Tx. 
+#1 = Met only - 707
+#2 = SU only - 353
+#3 = OAD ony - 81
+#4 = None - 1780
+#5 = Met + Su - 376
+#6 = Met + oad - 136
+#7 = Met + Su + OAD - 121 
+
+#Single Medications Results
+sum(Data_8$group_new == "1" & Data_8$MS == "1") #295 Deaths - 43.8%
+sum(Data_6$group_new == "2" & Data_6$MS == "1") #251 - 71.1%
+sum(Data_6$group_new == "3" & Data_6$MS == "1") #37 - 45.7%
+sum(Data_6$group_new == "4" & Data_6$MS == "1") #915 - 51.4%
+
+
+sum(Data_8$group_new == "1" & Data_8$MS == "0") #470 Survivors
+sum(Data_6$group_new == "2" & Data_6$MS == "0") #102
+sum(Data_6$group_new == "3" & Data_6$MS == "0") #44
+sum(Data_6$group_new == "4" & Data_6$MS == "0") #865
+
+## Secondary part- Double and double and triple medications use
+sum(Data_8$group_new == "5" & Data_8$MS == "1") #178 Deaths - 50.5%
+sum(Data_8$group_new == "6" & Data_8$MS == "1") #41  - 31.4%
+sum(Data_8$group_new == "7" & Data_8$MS == "1") #38 - 34.9%
+
+sum(Data_8$group_new == "5" & Data_8$MS == "0") #198 Deaths 
+sum(Data_8$group_new == "6" & Data_8$MS == "0") #95 - 
+sum(Data_8$group_new == "7" & Data_8$MS == "0") #83 
+
+#No. Overall Survivors
+sum(Data_8$MS == 1) #1755 Dead
+sum(Data_8$MS == 0) #1799 Alive
+
+#################
+#
+head(Data_8,1)
+Data_9 <- Data_8
+Data_9$follow_up <- difftime(Data_9$end_date, Data_9$doi, units="days")
+Data_9$follow_up <- as.numeric(Data_9$follow_up, units="days")
+Data_9$follow_up <- Data_9$follow_up*365.25
+
+sum(is.na(Data_9$follow_up))
+sum(Data_9$follow_up == (5/365.25))
+summary(Data_9$follow_up)
+
+crazy <- Data_9 %>% filter(follow_up < 0)
+crazy
+#No Missing End Date
+
+#So, some metfromin exposure times are negatives, these will be removed from the DB
+Data_10 <- Data_9
+Data_10 <- Data_10 %>% filter(Met_to_BrCa >= 0 | is.na(Met_to_BrCa))
+
+sum(Dat)
+
+
+
+
+
+
+
+#####
+
+#Subgroup Herceptin/PR status  - First see what is missing 
+sum(is.na(Data_7$oeststat))
+str(Data_7$oeststat)
+sum(Data_7$oeststat == "9")
+#164 is missing - Random Pattern
+
+sum(is.na(Data_7$herceptin.receptor.status)) #692 NA
+str(Data_7$herceptin.receptor.status)
+sum(Data_7$herceptin.receptor.status == "9", na.rm = TRUE) #364 "9"s 
+#1056 Missing - Admin and Random pattern
+
+sum(is.na(Data_7$progesterone.receptor.status)) #692 NA
+str(Data_7$progesterone.receptor.status)
+sum(Data_7$progesterone.receptor.status == "9", na.rm = TRUE) #694 "9"s
+#1386 Missing - Admin and Random
+
+
+
+
+#Then Exclude the subet from xx- xx-xxxx for PR/OR/HR status
+subset_1 <- data_7 %>% filter()
+
+count(Data_10)
+
+###TIME FOR THE BEST PART
+
+#Save Data_7 to COHORT VRAIBLE
+cohort <- Data_10
+head(cohorta, 25)
+sum(cohort$metformin == TRUE)
+count(cohort)
+#I shouldhave commented these, unsure what I was trying to accomplish
+#Cohort Selected 
+contents(cohort)
+follow_up
+surviv_tm
+
+#Cahnage Factor Levels
+cohort$bmi_diag_cat <- factor(cohort$bmi_diag_cat, levels = c('Underweight', 'Normal', 'Overweight', 'Obese class I', "Obese class II", "Obese class III"))
+cohort$smoke_cat <- factor(cohort$smoke_cat, levels = c("Never smoked", "Ex-smoker", "Current smoker"))
+cohort$Met_Cat <- cut2(cohort$Met_to_BrCa, c(2,4,6))
+
+summary(cohort$Diabetes_to_BrCa)
+#DONT RUN cohort$Diabetes_to_BrCa <- cohort$Diabetes_to_BrCa *365.25
+cohort$Diabetes_to_BrCa <- as.numeric(cohort$Diabetes_to_BrCa)
+cohort$DM_Cat <- cut2(cohort$Diabetes_to_BrCa, c(2,4,6,8,10))
+cohort$hba1c <- cut2(cohort$hba1c_doi, c(48))
+levels(cohort$ethnic) <- c("1", "1", "1", "1", "1", "1", "1", "1", "1","2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "3", "3")
+
+head(cohort, 1)
+#Explore Varaible Distributions
+ggplot(cohort, aes(x=age_at_diagbrca)) + geom_histogram(binwidth = 4, color = "red", fill = 'white', alpha = 0.9) + labs(title = "Histogram Showing Distribution of Patient Age at BC Diagnosis",  x = "Age(Years)", y = "Count") 
+summary(cohort$age_at_diagbrca)
+sd(cohort$age_at_diagbrca)
+#Normally Distributied
+
+ggplot(cohort, aes(x=year_of_diagdm)) + geom_histogram()
+ggplot(cohorta, aes(x=followup)) + geom_histogram()
+#Normally Distributed
+
+ggplot(cohort, aes(x=hba1c_doi)) + geom_histogram(binwidth = 4, color = "red", fill = 'white', alpha = 0.9) + labs(title = "Histogram Showing Distribution of Patient Glycaemic Control at BC Diagnosis",  x = "HbA1c", y = "Count") 
+ggplot(cohort, aes(x=hba1c_doi)) + geom_boxplot()
+#Right ske
+#Exclude Outliers?
+
+#Hba1 DOi 
+a =quantile(cohort$hba1c_doi, na.rm = TRUE)
+print(a)
+
+b = sd(cohort$hba1c_doi, na.rm = TRUE)
+print(b)
+
+IQR_hba1c = 61 -45
+Q1_hba1c = 45 - (1.5* IQR_hba1c)
+Q3_hba1c = 61 + (1.5* IQR_hba1c)
+
+sum(cohort$hba1c_doi < Q1_hba1c, na.rm = TRUE)
+sum(cohort$hba1c_doi > Q3_hba1c, na.rm = TRUE)
+# No reason to exclude
+
+
+#After Excluding Negative results
+ggplot(cohort, aes(x=follow_up)) + geom_histogram(binwidth = 0.5, color = "red", fill = 'white', alpha = 0.9) + labs(title = "Histogram Showing Distribution of Patient Follow-Up",  x = "Time (Years)", y = "Count") 
+ #After Exlcuding Negative Results
+ggplot(cohort, aes(x=Met_to_BrCa)) + geom_histogram(binwidth = 0.5, color = "red", fill = 'white', alpha = 0.9) + labs(title = "Histogram Showing Distribution of Patient Metformin Use",  x = "Time (Years)", y = "Count") 
+ggplot(cohort, aes(x=Diabetes_to_BrCa)) + geom_histogram(binwidth = 4, color = "red", fill = 'white', alpha = 0.9) + labs(title = "Histogram Showing Distribution of Patient Diabetes Duration",  x = "Time (Years)", y = "Count") 
+#
+
+head(cohorta$end_date, 5)
+sum(cohorta$doi < "2018-01-01")
+#Compare base Characterisitcs `betwen treatment groups
+count(cohorta)
+cohorta <- last_save
+cohorta <- cohorta %>% filter(group_new == "1" | group_new == "4")
+head(cohort,1)
+
+sum(cohort$doi > "2016-01-01")
+### MUSCH SIMPLER VARIABLES
+cohorta <- cohort
+cohortd <- cohort
+cohortd <- cohortd %>% mutate(
+		treat_updated=case_when(group_new == "4" ~"1",
+				group_new == "1" ~ "2",
+				group_new == "2" ~ "3",
+				group_new == "3" ~ "4",
+				TRUE~as.character(group_new)))
+cohortd <- cohortd %>% filter(treat_updated == "1" |treat_updated == "2" |treat_updated == "3" |treat_updated == "4" )
+
+max(cohort$end_date)
+
+cohorte <- cohort
+cohorte <- cohorte %>% mutate(
+		treatment=case_when(group_new == "1" ~"1",
+				group_new == "5" ~ "2",
+				group_new == "6" ~ "3",
+				group_new == "7" ~ "4",
+				TRUE~as.character(group_new)))
+cohorte <- cohorte %>% filter(treatment == "1" |treatment == "2" |treatment == "3" |treatment == "4" )
+cohorte$treatment <- as.factor(cohorte$treatment)
+levels(cohorte$treatment)
+count(cohorte)
+
+cohorta <- cohorta %>% mutate(
+		treat_new=case_when(group_new == "1" ~"1",
+				group_new == "4" ~"2",
+				TRUE~as.character(group_new)))
+cohorta$treat_new <- as.factor(cohorta$treat_new)
+levels(cohorta$treat_new)
+cohorta$treat_new <- factor(cohorta$treat_new, levels = c("2", "1"))
+
+cohortd$treat_updated <- as.factor(cohortd$treat_updated)
+levels(cohortd$treat_updated)
+cohortd$treat_new <- factor(cohortd$treat_new, levels = c("1", "2", "3", "4"))
+#COHORT DATA READY
+count(cohorta)
+
+# Grade
+cohort_1 <- cohort %>% filter(gradetype != 9)
+table(cohort_1$gradetype, cohort_1$metformin)
+chisq.test(cohort_1$gradetype, cohort_1$metformin)
+with(cohort_1, table(gradetype, metformin)) %>% prop.table(margin=1)
+
+
+
+		
+#ßimple 
+count(cohorta)
+#BMI
+summary(cohorta$bmi_diag_cat)
+table(cohorta$bmi_diag_cat, cohorta$treat_new)
+chisq.test(cohorta$bmi_diag_cat, cohorta$treat_new)
+with(cohorta, table(bmi_diag_cat, treat_new)) %>% prop.table(margin=1)
+
+#Age
+summary(cohorta$Age)
+table(cohorta$Age, cohorta$treat_new)
+chisq.test(cohorta$Age, cohorta$treat_new)
+with(cohorta, table(Age, treat_new)) %>% prop.table(margin=1)
+
+
+#Smoking Status
+
+summary(cohorta$smoke_cat)
+table(cohorta$smoke_cat, cohorta$treat_new)
+chisq.test(cohorta$smoke_cat, cohorta$treat_new)
+with(cohorta, table(smoke_cat, treat_new)) %>% prop.table(margin=1)
+
+#Hba1c
+summary(cohorta$hba1c)
+table(cohorta$hba1c, cohorta$treat_new)
+chisq.test(cohorta$hba1c, cohorta$treat_new)
+with(cohorta, table(hba1c, treat_new)) %>% prop.table(margin=1)
+
+#GradeTYpe
+levels(cohorta$gradetype)[levels(cohorta$gradetype)=="9"] <- NA
+levels(cohortd$gradetype)[levels(cohortd$gradetype)=="9"] <- NA
+summary(cohorta$gradetype)
+table(cohorta$gradetype, cohorta$treat_new)
+chisq.test(cohorta$gradetype, cohorta$treat_new)
+with(cohorta, table(gradetype, treat_new)) %>% prop.table(margin=1)
+
+#Ethnic
+str(cohort$ethnic)
+levels(cohorta$ethnic)[levels(cohorta$ethnic)=="3"] <- NA
+levels(cohortd$ethnic)[levels(cohortd$ethnic)=="3"] <- NA
+summary(cohorta$ethnic)
+sum(is.na(cohorta$ethnic))
+table(cohorta$ethnic, cohorta$treat_new)
+chisq.test(cohorta$ethnic, cohorta$treat_new)
+with(cohorta, table(ethnic, treat_new)) %>% prop.table(margin=1)
+
+#SIMD
+summary(cohorta$simd.2016.quintile)
+table(cohorta$simd.2016.quintile, cohorta$treat_new)
+chisq.test(cohorta$simd.2016.quintile, cohorta$treat_new)
+with(cohorta, table(simd.2016.quintile, treat_new)) %>% prop.table(margin=1)
+
+head(cohorta, 1)
+
+#Continuous Variables
+#diabetes duration
+print(table(cohorta$treat_new))
+summary(cohorta$Diabetes_to_BrCa)
+cohorta_met <- cohorta %>% filter(treat_new == "1")
+cohorta_nomet <-cohorta %>% filter(treat_new == "2")
+count(cohorta_nomet)
+summary(cohorta_met$Diabetes_to_BrCa)
+summary(cohorta_nomet$Diabetes_to_BrCa)
+sum(is.na(cohorta$Diabetes_to_BrCa))
+
+wilcox.test(cohorta_nomet$Diabetes_to_BrCa, cohorta_met$Diabetes_to_BrCa, alternative = "two.sided")
+
+#Met Duration
+summary(cohorta$Met_to_BrCa)
+sum(is.na(cohorta$Met_to_BrCa))
+summary(cohorta_met$Met_to_BrCa)
+summary(cohorta_nomet$Met_to_BrCa)
+wilcox.test(cohorta_nomet$Met_to_BrCa, cohorta_met$Met_to_BrCa, alternative = "two.sided")
+
+#Age Duration
+summary(cohorta$age_at_diagbrca)
+sd(cohorta$age_at_diagbrca)
+sd(cohorta_met$age_at_diagbrca)
+sd(cohorta_nomet$age_at_diagbrca)
+sum(is.na(cohorta$age_at_diagbrca))
+summary(cohorta_met$age_at_diagbrca)
+summary(cohorta_nomet$age_at_diagbrca)
+t.test(cohorta_nomet$age_at_diagbrca, cohorta_met$age_at_diagbrca)
+
+#Follow_up Duration
+summary(cohorta$follow_up)
+sum(is.na(cohorta$follow_up))
+summary(cohorta_met$follow_up)
+summary(cohorta_nomet$follow_up)
+wilcox.test(cohorta_nomet$follow_up, cohorta_met$follow_up, alternative = "two.sided")
+
+#PR
+str(cohorta$progesterone.receptor.status)
+summary(cohorta$progesterone.receptor.status)
+sum(is.na(cohorta$progesterone.receptor.status))
+levels(cohorta$progesterone.receptor.status)[levels(cohorta$progesterone.receptor.status)=="9"] <- NA
+levels(cohortd$progesterone.receptor.status)[levels(cohortd$progesterone.receptor.status)=="9"] <- NA
+
+table(cohorta$followup, cohorta$treat_new)
+chisq.test(cohorta$followup, cohorta$treat_new)
+with(cohorta, table(followup, treat_new)) %>% prop.table(margin=2)
+count(cohorta)
+#Oest
+
+levels(cohorta$oeststat)[levels(cohorta$oeststat)=="9"] <- NA
+levels(cohortd$oeststat)[levels(cohortd$oeststat)=="9"] <- NA
+summary(cohorta$oeststat)
+table(cohorta$oeststat, cohorta$treat_new)
+chisq.test(cohorta$oeststat, cohorta$treat_new)
+with(cohorta, table(oeststat, treat_new)) %>% prop.table(margin=1)
+sum(is.na(cohorta$oeststat))
+
+#Her
+levels(cohorta$herceptin.receptor.status)[levels(cohorta$herceptin.receptor.status)=="9"] <- NA
+levels(cohortd$herceptin.receptor.status)[levels(cohortd$herceptin.receptor.status)=="9"] <- NA
+summary(cohorta$herceptin.receptor.status)
+table(cohorta$herceptin.receptor.status, cohorta$treat_new)
+chisq.test(cohorta$herceptin.receptor.status, cohorta$treat_new)
+with(cohorta, table(herceptin.receptor.status, treat_new)) %>% prop.table(margin=1)
+
+#DM CAT
+table(cohorta$DM_Cat, cohort$metformin)
+chisq.test(cohorta$DM_Cat, cohorta$metformin)
+with(cohorta, table(DM_Cat, metformin)) %>% prop.table(margin=1)
+
+
+
+
+############
+##Now see which impact survival 
+#############
+head(cohorta, 10)
+#Death_cens  == "1" is a reg. death
+#ßimple 
+#BMI
+summary(cohorta$death_cens)
+table(cohorta$bmi_diag_cat, cohorta$death_cens)
+chisq.test(cohorta$bmi_diag_cat, cohorta$death_cens)
+with(cohorta, table(bmi_diag_cat, death_cens)) %>% prop.table(margin=1)
+
+#Age
+summary(cohorta$Age)
+table(cohorta$Age, cohorta$treat_new)
+chisq.test(cohorta$Age, cohorta$treat_new)
+with(cohorta, table(Age, treat_new)) %>% prop.table(margin=1)
+
+
+#Smoking Status
+
+summary(cohorta$smoke_cat)
+table(cohorta$smoke_cat, cohorta$death_cens)
+chisq.test(cohorta$smoke_cat, cohorta$death_cens)
+with(cohorta, table(smoke_cat, death_cens)) %>% prop.table(margin=1)
+
+#Hba1c
+summary(cohorta$hba1c)
+table(cohorta$hba1c, cohorta$death_cens)
+chisq.test(cohorta$hba1c, cohorta$death_cens)
+with(cohorta, table(hba1c, death_cens)) %>% prop.table(margin=1)
+
+#GradeTYpe
+levels(cohorta$gradetype)[levels(cohorta$gradetype)=="9"] <- NA
+summary(cohorta$gradetype)
+table(cohorta$gradetype, cohorta$death_cens)
+chisq.test(cohorta$gradetype, cohorta$death_cens)
+with(cohorta, table(gradetype, death_cens)) %>% prop.table(margin=1)
+
+#Ethnic
+str(cohort$ethnic)
+levels(cohorta$ethnic)[levels(cohorta$ethnic)=="3"] <- NA
+summary(cohorta$ethnic)
+sum(is.na(cohorta$ethnic))
+table(cohorta$ethnic, cohorta$death_cens)
+chisq.test(cohorta$ethnic, cohorta$death_cens)
+with(cohorta, table(ethnic, death_cens)) %>% prop.table(margin=1)
+
+#SIMD
+summary(cohorta$simd.2016.quintile)
+table(cohorta$simd.2016.quintile, cohorta$death_cens)
+chisq.test(cohorta$simd.2016.quintile, cohorta$death_cens)
+with(cohorta, table(simd.2016.quintile, death_cens)) %>% prop.table(margin=1)
+
+head(cohorta, 1)
+
+#Continuous Variables
+#diabetes duration
+summary(cohorta$Diabetes_to_BrCa)
+cohorta_alive <- cohorta %>% filter(death_cens == "0")
+cohorta_dead <-cohorta %>% filter(death_cens == "1")
+summary(cohorta_alive$Diabetes_to_BrCa)
+summary(cohorta_dead$Diabetes_to_BrCa)
+sum(is.na(cohorta$Diabetes_to_BrCa))
+
+wilcox.test(cohorta_dead$Diabetes_to_BrCa, cohorta_alive$Diabetes_to_BrCa, alternative = "two.sided")
+
+#Met Duration
+summary(cohorta$Met_to_BrCa)
+sum(is.na(cohorta$Met_to_BrCa))
+summary(cohorta_alive$Met_to_BrCa)
+summary(cohorta_dead$Met_to_BrCa)
+wilcox.test(cohorta_dead$Met_to_BrCa, cohorta_alive$Met_to_BrCa, alternative = "two.sided")
+
+#Age Duration
+summary(cohorta$age_at_diagbrca)
+sd(cohorta$age_at_diagbrca)
+sd(cohorta_alive$age_at_diagbrca)
+sd(cohorta_dead$age_at_diagbrca)
+sum(is.na(cohorta$age_at_diagbrca))
+summary(cohorta_alive$age_at_diagbrca)
+summary(cohorta_dead$age_at_diagbrca)
+t.test(cohorta_dead$age_at_diagbrca, cohorta_alive$age_at_diagbrca)
+
+#Follow_up Duration
+summary(cohorta$follow_up)
+sum(is.na(cohorta$follow_up))
+summary(cohorta_alive$follow_up)
+summary(cohorta_dead$follow_up)
+wilcox.test(cohorta_dead$follow_up, cohorta_alive$follow_up, alternative = "two.sided")
+
+#PR
+summary(cohorta$progesterone.receptor.status)
+
+table(cohorta$progesterone.receptor.status, cohorta$death_cens)
+chisq.test(cohorta$progesterone.receptor.status, cohorta$death_cens)
+with(cohorta, table(progesterone.receptor.status, death_cens)) %>% prop.table(margin=1)
+
+#Oest
+
+summary(cohorta$oeststat)
+table(cohorta$oeststat, cohorta$death_cens)
+chisq.test(cohorta$oeststat, cohorta$death_cens)
+with(cohorta, table(oeststat, death_cens)) %>% prop.table(margin=1)
+
+#Her
+summary(cohorta$herceptin.receptor.status)
+table(cohorta$herceptin.receptor.status, cohorta$death_cens)
+chisq.test(cohorta$herceptin.receptor.status, cohorta$death_cens)
+with(cohorta, table(herceptin.receptor.status, death_cens)) %>% prop.table(margin=1)
+
+#DM Cat
+table(cohorta$DM_Cat, cohorta$death_cens)
+chisq.test(cohorta$DM_Cat, cohorta$death_cens)
+with(cohorta, table(DM_Cat, death_cens)) %>% prop.table(margin=1)
+
+sum(is.na(cohorta$DM_Cat))
+
+
+#Met Cat #0.177
+cohorta$Met_Cat <- cut2(cohorta$Met_to_BrCa, g = 4)
+table(cohorta$Met_Cat, cohorta$death_cens)
+chisq.test(cohorta$Met_Cat, cohorta$death_cens)
+with(cohorta, table(Met_Cat, death_cens)) %>% prop.table(margin=1)
+table(cohort)
+
+
+#####
+#Missing Pattern
+######
+#Table of Missing 
+######
+head(cohorta, 1)
+
+sum(is.na(cohorta$bmi_diag))
+summary(cohorta$bmi_diag)
+sum(is.na(cohorta_met$bmi_diag))
+sum(is.na(cohorta_nomet$bmi_diag))
+
+sum(is.na(cohorta$hba1c))
+sum(is.na(cohorta_met$hba1c))
+sum(is.na(cohorta_nomet$hba1c))
+
+sum(is.na(cohorta$simd.2016.quintile))
+sum(is.na(cohorta_met$simd.2016.quintile))
+sum(is.na(cohorta_nomet$simd.2016.quintile))
+
+sum(is.na(cohorta$gradetype))
+sum(is.na(cohorta_met$gradetype))
+sum(is.na(cohorta_nomet$gradetype))
+
+sum(is.na(cohorta$oeststat))
+sum(is.na(cohorta_met$oeststat))
+sum(is.na(cohorta_nomet$oeststat))
+
+sum(is.na(cohorta$herceptin.receptor.status))
+sum(is.na(cohorta_met$herceptin.receptor.status))
+sum(is.na(cohorta_nomet$herceptin.receptor.status))
+
+sum(is.na(cohorta$progesterone.receptor.status))
+sum(is.na(cohorta_met$progesterone.receptor.status))
+sum(is.na(cohorta_nomet$progesterone.receptor.status))
+
+sum(is.na(cohorta$ethnic))
+sum(is.na(cohorta_met$ethnic))
+sum(is.na(cohorta_nomet$ethnic))
+
+
+
+cohorta$surviv_tm <- difftime(cohorta$date.of.death, cohorta$doi, units="days")
+cohorta$surviv_tm <- as.numeric(cohorta$surviv_tm)
+cohorta$surviv_tm <- cohorta$surviv_tm / 365.25
+
+sum(is.na(cohorta$surviv_tm))
+head(cohorta$follow_up)
+sum(cohorta$date.of.death == cohorta$end_date, na.rm = TRUE)
+
+
+cohortd$surviv_tm1 <- difftime(cohortd$date.of.death, cohorta$doi, units="days")
+cohortd$surviv_tm1 <- as.numeric(cohortd$surviv_tm)
+cohortd$surviv_tm1 <- cohortd$surviv_tm / 365.25
+
+head(cohortd, 1)
+#Kaplan Meier Cruves
+#GGplot2
+head(cohorta,10)
+sum(is.na(cohorta$surviv_tm))
+median(cohorta$surviv_tm, na.rm = TRUE)
+
+sum(cohorta$doi > "2016-01-01")
+head(cohorta$end_date, 10)
+difftime
+#THis MERGE HAS NOT WORKED
+head(cohorta)
+cohortX <- cohortf
+cohortX1 <- cohortX %>% filter(MS == "1")
+cohortX2 <- cohortX %>% filter(MS == "0")
+end_dates <- as.Date("2016-01-01")
+str(end_dates)
+cohortX2$surviv_tm <- difftime("2020-08-25", cohortX2$doi, units="days")
+cohortX2$surviv_tm <- as.numeric(cohortX2$surviv_tm)
+cohortX2$surviv_tm <- (cohortX2$surviv_tm / 365.25)
+#I DOnt understand why
+cohort_ex <- cohorta %>% filter(is.na(cohorta$surviv_tm))
+head(cohorta)
+head(cohortX2$follow_up)
+cohortX$surviv_tm[is.na(cohortX$surviv_tm)] <- cohortX2$surviv_tm
+cohortX$surviv_tm
+head(cohortX)
+print(final)
+count(cohortX)
+cohortf <- cohortX
+last_save <- cohorta
+mean(cohorta$surviv_tm, na.rm = TRUE)
+
+sum(cohorta$end_date == "2019-05-28")
+head(cohorta$end_date)
+
+###
+cohorty <- cohorta
+cohorty1 <- cohorty %>% filter(MS == "0")
+cohorty2 <- cohorty %>% filter(MS == "1")
+
+#Follow up for survivors
+cohorty1$followup <- difftime("2019-05-28", cohorty1$doi, units="days")
+cohorty1$followup <- as.numeric(cohorty1$followup)
+cohorty1$followup <- cohorty1$followup/365.25
+
+#follow up fr deahts
+cohorty2$followup <- difftime(cohorty2$date.of.death, cohorty2$doi, units="days")
+cohorty2$followup <- as.numeric(cohorty2$followup)
+cohorty2$followup <- (cohorty2$surviv_tm / 365.25)
+
+
+###
+
+
+median(cohorta$followup)
+min((cohorta$followup))
+max(cohorta$followup)
+
+cohort_met <- cohorta %>% filter(group_new == "1")
+median(cohort_met$followup)
+min((cohort_met$followup))
+max(cohort_met$followup)
+
+cohort_nomet <- cohorta %>% filter(group_new == "4")
+median(cohort_nomet$followup)
+min((cohort_nomet$followup))
+max(cohort_nomet$followup)
+
+library(ggplot2)
+count(cohorta)
+ggplot(cohorta, aes(x=followup)) + geom_histogram()
+
+#Cut due to incidence Times
+cohort_cut <- cohorta %>% filter(doi < "2016-01-01")
+cohort_up <- cohorta %>% filter(treat_new == "1" | treat_new == "4")
+head(cohort_cut)
+
+sum(is.na(cohorta$surviv_tm))
+#10 Year survivla with medians
+fit <- survfit(Surv(surviv_tm, MS=='1') ~ group_new, data = cohorta)
+fit
+ggsurvplot(fit, data = cohorta, legend.labs = c("No OAD", "Metformin Only"), size = 1, palette =c("#E7B800", "#2E9FDF"), ncensor.plot = TRUE, ncensor.plot.height = 0.17, risk.table.y.text = FALSE, risk.table = TRUE, risk.table.height = 0.17, conf.int = TRUE, pval = TRUE, ggtheme = theme_bw(), xlim = c(0,10),xlab = "Survival Time in Years", break.time.by = 1, ylim=c(0,1), surv.median.line = "hv")+ labs(title = "5-Year Kaplan-Meier Survival Curves Stratified by Metformin Use")
+head(cohorta, 1)
+count(cohorta)
+
+#Not sure what this 
+fit_2 <- survfit(Surv(follow_up, MS=='1') ~ treat_new, data = cohorta)
+fit_2
+ggsurvplot(fit, data = cohorta, legend.labs = c("No OAD", "Metformin"), size = 1, palette =c("#E7B800", "#2E9FDF"), ncensor.plot = TRUE, ncensor.plot.height = 0.17, risk.table.y.text = FALSE, risk.table = TRUE, risk.table.height = 0.17, conf.int = TRUE, pval = TRUE, ggtheme = theme_bw(), xlim = c(0,10),xlab = "Survival Time in Years", break.time.by = 1, ylim=c(0,1))+ labs(title = "5-Year Kaplan-Meier Survival Curves Stratified by Metformin Use")
+head(cohorta, 1)
+
+#By Year of Met_Cat
+fit_3 <- survfit(Surv(follow_up, MS=='1') ~ Met_Cat, data = cohorta)
+fit_3
+ggsurvplot(fit_3, data = cohorta, legend.labs = c("No OAD", "Metformin"), size = 1, palette =c("#E7B800", "#2E9FDF"), ncensor.plot = TRUE, ncensor.plot.height = 0.17, risk.table.y.text = FALSE, risk.table = TRUE, risk.table.height = 0.17, conf.int = TRUE, pval = TRUE, ggtheme = theme_bw(), xlim = c(0,10),xlab = "Survival Time in Years", break.time.by = 1, ylim=c(0,1), surv.median.line = "hv",)+ labs(title = "5-Year Kaplan-Meier Survival Curves Stratified by Metformin Use")
+head(cohorta, 1)
+
+#By Age
+fit_4 <- survfit(Surv(follow_up, MS=='1') ~ Age, data = cohorta)
+fit_4
+ggsurvplot(fit_4, data = cohorta, legend.labs = c("1st Quintile", "2nd Quintile", "3rd Quintile", "4th Quintile", "5th Quintile"), size = 1, ncensor.plot = TRUE, ncensor.plot.height = 0.17, risk.table.y.text = FALSE, risk.table = TRUE, risk.table.height = 0.17, conf.int = TRUE, pval = TRUE, ggtheme = theme_bw(), xlim = c(0,10),xlab = "Survival Time in Years", break.time.by = 1, ylim=c(0,1), surv.median.line = "hv",)+ labs(title = "5-Year Kaplan-Meier Survival Curves Stratified by Metformin Use")
+head(cohorta, 1)
+
+#BY BMI
+fit_5 <- survfit(Surv(follow_up, MS=='1') ~ bmi_diag_cat, data = cohorta)
+fit_5
+ggsurvplot(fit_5, data = cohorta, legend.labs = c("Normal", " Underweight", "Overweight", "Obese I", "Obese II", "Obese III"), size = 1, ncensor.plot = TRUE, ncensor.plot.height = 0.17, risk.table.y.text = FALSE, risk.table = TRUE, risk.table.height = 0.17, conf.int = TRUE, pval = TRUE, ggtheme = theme_bw(), xlim = c(0,10),xlab = "Survival Time in Years", break.time.by = 1, ylim=c(0,1))+ labs(title = "5-Year Kaplan-Meier Survival Curves Stratified by Metformin Use")
+head(cohorta, 1)
+
+#By HbA!C
+fit_6 <- survfit(Surv(follow_up, MS=='1') ~ hba1c, data = cohorta)
+fit_6
+ggsurvplot(fit_6, data = cohorta, legend.labs = c("Normal Range", "Above Target"), size = 1, ncensor.plot = TRUE, ncensor.plot.height = 0.17, risk.table.y.text = FALSE, risk.table = TRUE, risk.table.height = 0.17, conf.int = TRUE, pval = TRUE, ggtheme = theme_bw(), xlim = c(0,10),xlab = "Survival Time in Years", break.time.by = 1, ylim=c(0,1))+ labs(title = "5-Year Kaplan-Meier Survival Curves Stratified by Metformin Use")
+head(cohorta, 1)
+
+group_new
+count(cohorte)
+cohorte <- cohorte %>% filter
+#LL TX.
+#By HbA!C
+fit_7 <- survfit(Surv(follow_up, MS=='1') ~ treat_updated, data = cohortd)
+fit_7
+ggsurvplot(fit_7, data = cohortd, legend.labs = c("No OAD", "Metformin", "SU", "Other OAD"), size = 1, ncensor.plot = TRUE, ncensor.plot.height = 0.17, risk.table.y.text = FALSE, risk.table = TRUE, risk.table.height = 0.17, conf.int = TRUE, pval = TRUE, ggtheme = theme_bw(), xlim = c(0,10),xlab = "Survival Time in Years", break.time.by = 1, ylim=c(0,1))+ labs(title = "5-Year Kaplan-Meier Survival Curves Stratified by Metformin Use")
+head(cohorta, 1)
+
+
+
+cohortf <- cohorte %>% filter(metformin == TRUE)
+cohortf <- cohortf %>% mutate(
+		group_new=case_when(su == FALSE & oad == FALSE ~ "1",
+				su == TRUE & oad == FALSE ~ "2",
+				su == FALSE & oad == TRUE ~ "3",
+				su == TRUE & oad == TRUE ~ "4",
+				TRUE~as.character(group)))
+
+cohortf$group_new <- as.factor(cohortf$group_new)
+count(cohortf)
+sum(cohort$su == TRUE & cohort$metformin == TRUE & cohort$oad == FALSE)
+summary(cohortf$group_new)
+#By HbA!C
+summary(cohortd$treat_updated)
+count(cohorte)
+fit_8 <- survfit(Surv(surviv_tm, MS=='1') ~ group_new, data = cohortf)
+fit_8
+ggsurvplot(fit_8, data = cohorte, legend.labs = c("Met Only", "Met and SU", "Met and Other OAD", "Met and SU and other OAD"), size = 1, ncensor.plot = TRUE, ncensor.plot.height = 0.17, risk.table.y.text = FALSE, risk.table = TRUE, risk.table.height = 0.17, conf.int = TRUE, pval = TRUE, ggtheme = theme_bw(), xlim = c(0,10),xlab = "Survival Time in Years", break.time.by = 1, ylim=c(0,1))+ labs(title = "5-Year Kaplan-Meier Survival Curves Stratified by Metformin Use")
+head(cohorta, 1)
+cohortf$surviv_tm
+
+
+#Relevel
+
+cohorta$bmi_diag_cat<- factor(cohorta$bmi_diag_cat, levels = c('Normal', 'Underweight', 'Overweight', 'Obese class I', "Obese class II", "Obese class III"))
+
+#Univariate Cox 
+model_a <- coxph(Surv(surviv_tm, MS=="1") ~ metformin, data = cohorta)
+summary(model_a)
+
+model_b <- coxph(Surv(surviv_tm, MS=="1") ~ smoke_cat, data = cohorta)
+summary(model_b)
+
+model_c <- coxph(Surv(surviv_tm, MS=="1") ~ bmi_diag_cat, data = cohorta)
+summary(model_c)
+
+model_d <- coxph(Surv(surviv_tm, MS=="1") ~ hba1c, data = cohorta)
+summary(model_d)
+
+model_e <- coxph(Surv(surviv_tm, MS=="1") ~ gradetype, data = cohorta)
+summary(model_e)
+
+model_f <- coxph(Surv(surviv_tm, MS=="1") ~ simd.2016.quintile, data = cohorta)
+summary(model_f)
+
+model_g <- coxph(Surv(follow_up, MS=="1") ~ Met_Cat, data = cohorta)
+summary(model_g)
+
+model_h <- coxph(Surv(surviv_tm, MS=="1") ~ DM_Cat, data = cohorta)
+summary(model_h)
+
+model_i <- coxph(Surv(follow_up, MS=="1") ~ ethnic, data = cohorta)
+summary(model_i)
+
+model_j <- coxph(Surv(follow_up, MS=="1") ~ age_at_diagbrca, data = cohorta)
+summary(model_j)
+
+model_l <- coxph(Surv(follow_up, MS=="1") ~ age_at_diagbrca, data = cohorta)
+summary(model_l)
+
+
+
+#Multivaraite Analysis
+model_l <- step(coxph(Surv(follow_up, MS=="1") ~ treat_new  + Age + bmi_diag_cat, data = cohortc), scope=list(lower.~1, upper =.~. + simd.2016.quintile + smoke_cat + gradetype + ethnic + hba1c + oeststat + herceptin.receptor.status + progesterone.receptor.status), direction = "both")
+summary(model_l)
+
+sum(is.na(cohortb))
+model_m <- coxph(Surv(follow_up, MS=="1") ~ treat_new  + bmi_diag_cat, data = cohorta)
+summary(model_m)
+				
+model_m <- coxph(Surv(follow_up, MS=="1") ~ treat_new  + DM_Cat , data = cohorta)
+summary(model_m)
+
+model_m <- coxph(Surv(follow_up, MS=="1") ~ treat_new  + oeststat  , data = cohorta)
+summary(model_m)
+
+model_m <- coxph(Surv(follow_up, MS=="1") ~ treat_new  + herceptin.receptor.status , data = cohorta)
+summary(model_m)
+
+model_m <- coxph(Surv(follow_up, MS=="1") ~ treat_new  + progesterone.receptor.status , data = cohorta)
+summary(model_m)
+
+model_n <- coxph(Surv(follow_up, MS=="1") ~ treat_new  + gradetype, data = cohorta)
+summary(model_n)		
+
+#Multiple
+
+model_n <- coxph(Surv(follow_up, MS=="1")~ treat_new  + Age + DM_Cat + ethnic + hba1c + gradetype + oeststat + herceptin.receptor.status + progesterone.receptor.status, data = cohorta)
+summary(model_n)	
+
+							
+model_n <- coxph(Surv(follow_up, MS=="1") ~ treat_new  + Age + DM_Cat + ethnic + hba1c + gradetype + oeststat + herceptin.receptor.status + progesterone.receptor.status, data = cohorta)
+summary(model_n)
+
+#Exclusion Cohort 
+cohortb <- cohorta %>% filter(!is.na(gradetype))
+cohortb <- cohortb %>% filter(!is.na(oeststat))
+cohortb <- cohortb %>% filter(!is.na(herceptin.receptor.status))
+cohortb <- cohortb %>% filter(!is.na(bmi_diag_cat))
+cohortb <- cohortb %>% filter(!is.na(smoke_cat))
+cohortb <- cohortb %>% filter(!is.na(ethnic))
+cohortb <- cohortb %>% filter(!is.na(treat_new))
+cohortb <- cohortb %>% filter(!is.na(progesterone.receptor.status))
+cohortb <- cohortb %>% filter(!is.na(hba1c))
+cohortb <- cohortb %>% filter(!is.na(gradetype))
+
+count(cohortb)
+
+a <- (coxph(Surv(follow_up, MS=="1")~ treatment + age_at_diagbrca + bmi_diag_cat + gradetype + herceptin.receptor.status + DM_Cat + progesterone.receptor.status, data=cohorte))
+summary(a)
+AIC(a, k = 2)
+
+head(cohortd, 1)
+
+
+
+model_l <- step(coxph(Surv(follow_up, MS=="1") ~ Met_Cat + age_at_diagbrca + bmi_diag_cat , data = cohortb), scope=list(lower.~1, upper =.~. + DM_Cat + ethnic + bmi_diag_cat + age_at_diagbrca + gradetype + herceptin.receptor.status + progesterone.receptor.status), direction = "both")
+summary(model_l)
+
+#Chosen Adjustments v
+coxph(formula = Surv(follow_up, MS == "1") ~ age_at_diagbrca + 
+				gradetype + hba1c + herceptin.receptor.status + progesterone.receptor.status, 
+		data = cohortb)
+
+summary(coxph(Surv(follow_up, MS=="1")~ treat_new  + age_at_diagbrca + ethnic  + bmi_diag_cat+ herceptin.receptor.status + progesterone.receptor.status + gradetype, data = cohorta))
+
+#stages of model building
+model_n  <- coxph(Surv(follow_up, MS=="1") ~ treat_new , data = cohorta)
+summary(model_n)
+AIC(model_n, k = 2)
+
+model_n  <- coxph(Surv(follow_up, MS=="1") ~ treat_new + age_at_diagbrca, data = cohorta)
+summary(model_n)
+AIC(model_n, k = 2)
+
+
+model_o  <- coxph(Surv(follow_up, MS =="1") ~ treat_new + age_at_diagbrca + bmi_diag_cat, data = cohorta)
+summary(model_o)
+AIC(model_o, k = 2)
+
+model_p  <- coxph(Surv(follow_up, MS =="1") ~ treat_new + age_at_diagbrca + bmi_diag_cat + gradetype, data = cohorta)
+summary(model_p)
+AIC(model_p, k = 2)
+
+model_q  <- coxph(Surv(follow_up, MS=="1") ~ treat_new + age_at_diagbrca + bmi_diag_cat + gradetype + herceptin.receptor.status, data = cohorta)
+summary(model_q)
+AIC(model_q, k = 2)
+
+model_r  <- coxph(Surv(follow_up, MS=="1") ~ treat_new + age_at_diagbrca + bmi_diag_cat + gradetype + herceptin.receptor.status + progesterone.receptor.status, data = cohorta)
+summary(model_r)
+AIC(model_r, k = 2)
+
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ metformin + age_at_diagbrca +gradetype + herceptin.receptor.status + DM_Cat + progesterone.receptor.status , data = cohorta)
+summary(model_s)
+AIC(model_s, k = 2)
+
+#Final Model
+#+ DM_Cat + simd.2016.quintile + smoke_cat + ethnic
+cohort_up <- cohorta %>% filter(treat_new == "1" | treat_new == "4")
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new + age_at_diagbrca + gradetype + bmi_diag_cat, data = cohorta)
+summary(model_s)
+AIC(model_s, k = 2)
+
+head(cohorta, 1)
+#Need to Stratify by Ethnicity
+cohort_white <- cohorta %>% filter(ethnic == "1")
+cohort_nwhite <- cohorta %>% filter(ethnic == "2")
+
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new + age_at_diagbrca + gradetype + bmi_diag_cat  + smoke_cat+ DM_Cat + simd.2016.quintile , data = cohort_white)
+summary(model_s)
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new + age_at_diagbrca + gradetype + bmi_diag_cat  + smoke_cat+ DM_Cat + simd.2016.quintile , data = cohort_nwhite)
+summary(model_s)
+
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new , data = cohort_white)
+summary(model_s)
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new , data = cohort_nwhite)
+summary(model_s)
+
+#strat by Oes
+cohort_O1 <- cohorta %>% filter(oeststat == "0")
+cohort_O2 <- cohorta %>% filter(oeststat == "1")
+
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new + age_at_diagbrca + gradetype + bmi_diag_cat  + smoke_cat+ DM_Cat + simd.2016.quintile , data = cohort_O1)
+summary(model_s)
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new + age_at_diagbrca + gradetype + bmi_diag_cat  + smoke_cat+ DM_Cat + simd.2016.quintile , data = cohort_O2)
+summary(model_s)
+
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new , data = cohort_O1)
+summary(model_s)
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new , data = cohort_O2)
+summary(model_s)
+
+#strat by HR
+cohort_H0 <- cohorta %>% filter(herceptin.receptor.status == "0")
+cohort_H1 <- cohorta %>% filter(herceptin.receptor.status == "1")
+count(cohort_H1)
+
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new + age_at_diagbrca + gradetype + bmi_diag_cat  + smoke_cat+ DM_Cat + simd.2016.quintile , data = cohort_H0)
+summary(model_s)
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new + age_at_diagbrca + gradetype + bmi_diag_cat  + smoke_cat+ DM_Cat + simd.2016.quintile , data = cohort_H1)
+summary(model_s)
+
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new , data = cohort_H0)
+summary(model_s)
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new , data = cohort_H1)
+summary(model_s)
+#strat by PR
+cohort_P0 <- cohorta %>% filter(progesterone.receptor.status == "0")
+cohort_P1 <- cohorta %>% filter(progesterone.receptor.status == "1")
+
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new + age_at_diagbrca + gradetype + bmi_diag_cat  + smoke_cat+ DM_Cat + simd.2016.quintile , data = cohort_P0)
+summary(model_s)
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new + age_at_diagbrca + gradetype + bmi_diag_cat  + smoke_cat+ DM_Cat + simd.2016.quintile , data = cohort_P1)
+summary(model_s)
+
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new , data = cohort_P0)
+summary(model_s)
+model_s  <- coxph(Surv(surviv_tm, MS=="1") ~ treat_new , data = cohort_P1)
+summary(model_s)
+
+
+
+
+
+
+
+cohort_updated <- cohorta %>% filter(bmi_diag_cat != "Underweight")
+cohort_Under <- cohorta %>% filter(bmi_diag_cat == "Underweight")
+cohort_Norm <- cohorta %>% filter(bmi_diag_cat == "Normal")
+cohort_Over <- cohorta %>% filter(bmi_diag_cat == "Overweight")
+cohort_OBI <- cohorta %>% filter(bmi_diag_cat == "Obese class I")
+cohort_OBII <- cohorta %>% filter(bmi_diag_cat == "Obese class II")
+cohort_OBIII <- cohorta %>% filter(bmi_diag_cat == "Obese class III")
+cohort_OB <- cohorta %>% filter(bmi_diag_cat =="Obese class I" | bmi_diag_cat == "Obese class II" | bmi_diag_cat == "Obese class III")
+summary(cohorta$bmi_diag_cat)
+
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ metformin + age_at_diagbrca +gradetype + herceptin.receptor.status + DM_Cat + progesterone.receptor.status , data = cohort_OB)
+summary(model_s)
+AIC(model_s, k = 2)
+
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new + age_at_diagbrca +gradetype + herceptin.receptor.status + DM_Cat + progesterone.receptor.status , data = cohort_Under)
+summary(model_s)
+AIC(model_s, k = 2)
+
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new + age_at_diagbrca +gradetype + herceptin.receptor.status + DM_Cat + progesterone.receptor.status , data = cohort_Norm)
+summary(model_s)
+AIC(model_s, k = 2)
+
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new + age_at_diagbrca +gradetype + herceptin.receptor.status + DM_Cat + progesterone.receptor.status , data = cohort_Over)
+summary(model_s)
+AIC(model_s, k = 2)
+
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new + age_at_diagbrca +gradetype + herceptin.receptor.status + DM_Cat + progesterone.receptor.status , data = cohort_OBI)
+summary(model_s)
+AIC(model_s, k = 2)
+
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new + age_at_diagbrca +gradetype + herceptin.receptor.status + DM_Cat + progesterone.receptor.status , data = cohort_OBII)
+summary(model_s)
+AIC(model_s, k = 2)
+
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new + age_at_diagbrca +gradetype + herceptin.receptor.status + DM_Cat + progesterone.receptor.status , data = cohort_Norm)
+summary(model_s)
+AIC(model_s, k = 2)
+
+#No without adjustment
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new, data = cohort_Under)
+summary(model_s)
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new, data= cohort_Norm)
+summary(model_s)
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new, data = cohort_Over)
+summary(model_s)
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new, data = cohort_OB)
+summary(model_s)
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new, data = cohort_OBI)
+summary(model_s)
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new, data = cohort_OBII)
+summary(model_s)
+model_s  <- coxph(Surv(follow_up, MS=="1") ~ treat_new, data = cohort_OBIII)
+summary(model_s)
+
+
+
+#With Partial adjustment
+
+#Herceptin Effect Modifie
+
+count(cohorta)
+
+
+#Example
+
+model_n <- coxph(Surv(follow_up, MS=="1")~ treat_new  + Age  + ethnic + hba1c + gradetype + oeststat + herceptin.receptor.status + progesterone.receptor.status, data = cohorta)
+summary(model_n)	
+
+cohortc <- cohorta %>% filter(bmi_diag_cat == "Normal" & hba1c_doi <= 48)
+summary(cohorta$treat)
+
+#####
+count()
+#The last Sig Adjustment 
+summary(coxph(Surv(follow_up, MS=="1")~ treat_new  + treat_new:oeststat + oeststat , data=cohorta))
+summary(coxph(Surv(follow_up, MS=="1")~ treat_new  + treat_new:progesterone.receptor.status + progesterone.receptor.status , data=cohorta))
+summary(coxph(Surv(follow_up, MS=="1")~ treat_new  + treat_new:herceptin.receptor.status + herceptin.receptor.status , data=cohorta))
+
+head(cohorta,1)
+#Death By Met- not Sign
+table(cohort$death_cens, cohort$metformin)
+chisq.test(cohort$death_cens, cohort$metformin)
+with(cohort, table(death_cens, metformin)) %>% prop.table(margin=1)
+
+table(cohort$death_cvd, cohort$metformin)
+chisq.test(cohort$death_cvd, cohort$metformin)
+with(cohort, table(death_cvd, metformin)) %>% prop.table(margin=1)
+
+table(cohort$death_dm, cohort$metformin)
+chisq.test(cohort$death_dm, cohort$metformin)
+with(cohort, table(death_dm, metformin)) %>% prop.table(margin=1)
+
+#These are significant
+table(cohort$death_anyca, cohort$metformin)
+chisq.test(cohort$death_anyca, cohort$metformin)
+with(cohort, table(death_anyca, metformin)) %>% prop.table(margin=1)
+
+table(cohort$death_brca, cohort$metformin)
+chisq.test(cohort$death_brca, cohort$metformin)
+with(cohort, table(death_brca, metformin)) %>% prop.table(margin=1)
+
+#See Dose-rsponse relationship
+table(cohort$Met_Cat, cohort$death_cens)
+chisq.test(cohort$Met_Cat, cohort$death_cens)
+with(cohort, table(Met_to_BrCa, death_cens)) %>% prop.table(margin=1)
+#Not significant
+
+
+model_z <- coxph(Surv(follow_up, MS=="1")~ DM_Cat, data= cohorta)
+summary(model_z)
+#See which varibles impact survival 
+summary(model_c)
+model_f$coefficients[1:4]
+
+#Plots
+plot(cox.zph(model_s)[1])
+plot(cox.zph(model_s)[2])
+plot(cox.zph(model_s)[3])
+plot(cox.zph(model_s)[4])
+plot(cox.zph(model_s)[5])
+plot(cox.zph(model_s)[6])
+plot(cox.zph(model_s)[7])
+plot(cox.zph(model_s)[8])
+
+#PH Testing
+(cox.zph(model_s)[1])
+(cox.zph(model_s)[2])
+(cox.zph(model_s)[3])
+(cox.zph(model_s)[4])
+(cox.zph(model_s)[5])
+(cox.zph(model_s)[6])
+(cox.zph(model_s)[7])
+(cox.zph(model_s)[8])
+
+#Linearity ASsumption Testing
+errbar(x=c(1:4),y = model_z$coefficients[1:4],yplus = confint(model_z)[1:4,2],yminus = confint(model_z)[1:4,1], main = "Parameter estimates for categorised Age model",xlab = "Diabetes Duration Groups (Relative to Under 2 Years Use)",ylab="Estimate + 95% CI",xaxt="n")
+axis(side = 1, at = c(1:4), labels = c("Second", "Third", "Fourth", "Fifth"));
+
+errbar(x=c(1:3),y = model_e$coefficients[-1],yplus = confint(model_e)[-1,2],yminus = confint(model_e)[-1,1], main = "Parameter estimates for categorised Age model",xlab = "BMI Groups (Relative to Normal)",ylab="Estimate + 95% CI",xaxt="n")
